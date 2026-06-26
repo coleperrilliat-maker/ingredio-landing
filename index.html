@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ingredio — Import any recipe from anywhere</title>
+<meta name="description" content="Ingredio is the most advanced recipe importing app, extracting recipes directly from videos, not just captions — to deliver accurate, structured recipes in seconds." />
+<link rel="icon" type="image/png" href="assets/app-icon.png" />
+<meta property="og:title" content="Import any recipe from anywhere — Ingredio" />
+<meta property="og:image" content="assets/deck-phone1.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  @font-face {
+    font-family: "Merriweather";
+    src: url("assets/Merriweather.ttf") format("truetype");
+    font-weight: 300 900; font-display: swap;
+  }
+
+  :root {
+    --cream: #fffbf5;
+    --orange: #ff741f;
+    --ink: #111111;
+    --serif: "Merriweather", Georgia, serif;
+    --display: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--cream); color: var(--ink);
+    font-family: var(--serif); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  img { display: block; max-width: 100%; }
+  a { text-decoration: none; color: inherit; }
+  .wrap { width: min(1180px, 92vw); margin: 0 auto; }
+
+  /* ============ TOP NAV ============ */
+  .topbar {
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(255, 251, 245, 0.82);
+    backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .tb-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+  .tb-brand { display: flex; align-items: center; gap: 10px; }
+  .tb-brand img { width: 38px; height: 38px; border-radius: 50%; }
+  .tb-brand span { font-family: var(--serif); font-weight: 800; font-size: 24px; color: var(--orange); letter-spacing: -0.02em; }
+  .tb-links { display: flex; align-items: center; gap: 34px; }
+  .tb-links a { font-family: var(--display); font-size: 15px; font-weight: 500; color: #1c1c1c; transition: color .15s; }
+  .tb-links a:hover { color: var(--orange); }
+  .tb-cta {
+    font-family: var(--display); font-weight: 600; font-size: 15px; color: #fff;
+    background: var(--orange); padding: 11px 22px; border-radius: 999px;
+    transition: transform .18s, box-shadow .18s; box-shadow: 0 8px 18px rgba(255,116,31,.28);
+  }
+  .tb-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(255,116,31,.38); }
+
+  /* ============ SLIDE 1 ============ */
+  .slide1 { position: relative; overflow: hidden; padding: 50px 0 50px; }
+  .s1-grid { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; min-height: 76vh; }
+  .s1-text { text-align: center; max-width: clamp(420px, 48vw, 660px); }
+  .stars { display: flex; justify-content: center; margin-bottom: 20px; }
+  .stars img { width: clamp(200px, 24vw, 290px); height: auto; }
+  .s1-text h1 {
+    font-family: var(--display); font-weight: 800; color: var(--ink);
+    font-size: clamp(46px, 7.2vw, 94px); line-height: 1.0; letter-spacing: -0.01em;
+  }
+  .s1-text p {
+    font-family: var(--serif); font-size: clamp(17px, 1.85vw, 24px); line-height: 1.55;
+    color: #1c1c1c; margin: 26px auto 0; max-width: 30em;
+  }
+  .s1-phone { position: absolute; right: -5vw; top: 50%; transform: translateY(-50%); z-index: 1; }
+  .s1-phone img { width: clamp(220px, 23vw, 300px); }
+
+  /* decorations */
+  .s1-icons { position: absolute; top: 6%; left: -1%; width: clamp(230px, 28vw, 380px); z-index: 3; }
+  .s1-plate { position: absolute; bottom: -6%; left: -3%; width: clamp(200px, 24vw, 330px); z-index: 1; }
+
+  /* orange badge band */
+  .band { background: var(--orange); padding: 46px 16px; }
+  .band-inner { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 12px; background: #000; color: #fff;
+    padding: 13px 26px; border-radius: 12px; text-decoration: none;
+    transition: transform .18s, box-shadow .18s;
+  }
+  .badge:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.25); }
+  .badge svg { width: 28px; height: 28px; }
+  .badge .bt { display: flex; flex-direction: column; line-height: 1.05; font-family: var(--display); }
+  .badge .bt small { font-size: 11px; font-weight: 500; opacity: .9; }
+  .badge .bt b { font-size: 20px; font-weight: 700; letter-spacing: .01em; }
+
+  /* ============ WAITLIST ============ */
+  .wl { width: 100%; max-width: 540px; margin: 0 auto; }
+  .wl-head { font-family: var(--serif); font-weight: 800; color: #fff; font-size: clamp(20px, 2.6vw, 30px); margin-bottom: 16px; }
+  .waitlist { display: flex; gap: 10px; }
+  .waitlist input {
+    flex: 1; min-width: 0; height: 56px; border-radius: 14px; border: none; padding: 0 18px;
+    font-size: 16px; font-family: var(--display); background: #fff; color: var(--ink);
+    box-shadow: 0 6px 16px rgba(0,0,0,.12); outline: none;
+  }
+  .waitlist input::placeholder { color: #9a9189; }
+  .waitlist.err input { box-shadow: 0 0 0 2.5px #7a1109; }
+  .waitlist button {
+    flex: none; height: 56px; padding: 0 28px; border-radius: 14px; border: none; cursor: pointer;
+    background: #15120f; color: #fff; font-family: var(--display); font-weight: 600; font-size: 16px;
+    transition: transform .18s, box-shadow .18s;
+  }
+  .waitlist button:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,.3); }
+  .waitlist button:disabled { opacity: .7; cursor: default; transform: none; }
+  .wl-note { font-family: var(--display); font-size: 13.5px; margin-top: 13px; color: #fff; opacity: .92; }
+  .wl-note a { text-decoration: underline; }
+  .wl-success { font-family: var(--serif); font-size: 19px; font-weight: 700; color: #fff; }
+  @media (max-width: 480px) { .waitlist { flex-direction: column; } .waitlist button { width: 100%; } }
+
+  /* ============ SLIDE 2 ============ */
+  .slide2 { padding: 70px 0 80px; }
+  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .col h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(24px, 2.6vw, 33px); line-height: 1.1; color: var(--ink); }
+  .col p { font-family: var(--serif); font-size: clamp(14px, 1.4vw, 18px); color: #222; margin-top: 6px; }
+  .col .shot {
+    margin-top: 22px; background: #f1f1f1; border-radius: 30px; overflow: hidden;
+    aspect-ratio: 1 / 1.02; display: flex; justify-content: center;
+  }
+  .col .shot img { width: 84%; align-self: flex-start; margin-top: 7%; }
+
+  /* ============ SLIDE 3 ============ */
+  .slide3 { padding: 80px 0 90px; }
+  .s3-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 40px; align-items: center; }
+  .s3-phones img { width: min(560px, 100%); }
+  .s3-text h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(30px, 4vw, 52px); line-height: 1.12; color: var(--ink); letter-spacing: -0.01em; }
+  .s3-text h2 .or { color: var(--orange); }
+  .s3-text h2 .it { font-style: italic; }
+  .s3-text p { font-family: var(--serif); font-size: clamp(17px, 1.7vw, 23px); line-height: 1.5; color: #1c1c1c; margin: 22px 0 30px; max-width: 16em; }
+  .s3-icons { width: min(420px, 90%); }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 860px) {
+    .tb-links a:not(.tb-cta) { display: none; }
+    .s1-grid { flex-direction: column; min-height: 0; gap: 30px; }
+    .s1-text { max-width: 100%; padding-top: 90px; }
+    .s1-icons { width: 130px; top: 18px; left: 12px; }
+    .s1-plate { width: 150px; bottom: auto; top: 18px; left: auto; right: -30px; }
+    .s1-phone { position: static; transform: none; }
+    .s1-phone img { width: min(280px, 74%); }
+    .cols { grid-template-columns: 1fr; gap: 50px; text-align: center; }
+    .col p { margin-left: auto; margin-right: auto; max-width: 22em; }
+    .s3-grid { grid-template-columns: 1fr; gap: 36px; text-align: center; }
+    .s3-text p { margin-left: auto; margin-right: auto; }
+    .s3-icons { margin: 0 auto; }
+    .s3-phones { order: -1; }
+    .s3-phones img { margin: 0 auto; }
+  }
+  @media (max-width: 480px) {
+    .slide1 { padding: 30px 0 40px; }
+    .badge { padding: 11px 18px; }
+    .badge .bt b { font-size: 17px; }
+  }
+
+  /* shared section heading */
+  .shead { text-align: center; max-width: 40em; margin: 0 auto 56px; }
+  .eyebrow { font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--orange); }
+  .shead h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(30px, 4.2vw, 46px); line-height: 1.12; color: var(--ink); margin: 14px 0 14px; letter-spacing: -0.01em; }
+  .shead p { font-family: var(--serif); font-size: clamp(16px, 1.6vw, 20px); color: #4a443c; }
+
+  /* ============ HOW IT WORKS ============ */
+  .how { position: relative; overflow: hidden; padding: 96px 0; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; position: relative; z-index: 2; }
+  .stepc { text-align: center; }
+  .stepc .num {
+    width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 22px;
+    background: var(--orange); color: #fff; display: grid; place-items: center;
+    font-family: var(--display); font-weight: 700; font-size: 28px;
+    box-shadow: 0 14px 28px rgba(255,116,31,.32);
+  }
+  .stepc h3 { font-family: var(--serif); font-weight: 800; font-size: 23px; margin-bottom: 8px; color: var(--ink); }
+  .stepc p { font-family: var(--serif); font-size: 16px; color: #4a443c; max-width: 20em; margin: 0 auto; }
+  .how-deco { position: absolute; bottom: -90px; right: -70px; width: min(320px, 26vw); z-index: 0; opacity: .9; }
+
+  /* ============ TESTIMONIALS ============ */
+  .tst { padding: 90px 0; }
+  .tcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .tcard { background: #fff; border: 1px solid #efe4da; border-radius: 24px; padding: 30px 28px; box-shadow: 0 10px 30px rgba(120,60,20,.05); }
+  .tcard .rate { color: #ffae00; letter-spacing: 3px; font-size: 17px; margin-bottom: 14px; }
+  .tcard blockquote { font-family: var(--serif); font-size: 17px; line-height: 1.55; color: #2a241d; }
+  .tcard .who { margin-top: 20px; display: flex; align-items: center; gap: 12px; }
+  .tcard .who .av { width: 42px; height: 42px; border-radius: 50%; background: var(--orange); color: #fff; display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 17px; }
+  .tcard .who b { font-family: var(--display); font-weight: 600; font-size: 15px; display: block; color: var(--ink); }
+  .tcard .who span { font-family: var(--display); font-size: 13px; color: #8a8178; }
+
+  /* ============ FAQ ============ */
+  .faq { padding: 90px 0; }
+  .faq-list { max-width: 760px; margin: 0 auto; }
+  .faq details { border-bottom: 1px solid #e7ddd0; padding: 4px 0; }
+  .faq summary {
+    list-style: none; cursor: pointer; padding: 22px 4px; display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    font-family: var(--serif); font-weight: 700; font-size: clamp(17px, 1.8vw, 21px); color: var(--ink);
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary .pm { flex: none; width: 26px; height: 26px; position: relative; transition: transform .25s ease; }
+  .faq summary .pm::before, .faq summary .pm::after { content: ""; position: absolute; background: var(--orange); border-radius: 2px; }
+  .faq summary .pm::before { top: 12px; left: 4px; right: 4px; height: 2.6px; }
+  .faq summary .pm::after { left: 12px; top: 4px; bottom: 4px; width: 2.6px; transition: opacity .2s ease; }
+  .faq details[open] summary .pm::after { opacity: 0; }
+  .faq details[open] summary .pm { transform: rotate(180deg); }
+  .faq .ans { padding: 0 4px 24px; font-family: var(--serif); font-size: 16.5px; line-height: 1.6; color: #4a443c; max-width: 64ch; }
+
+  /* ============ FINAL CTA ============ */
+  .fcta { padding: 70px 0 96px; }
+  .fcta-box {
+    position: relative; overflow: hidden; background: var(--orange); border-radius: 36px;
+    padding: 72px 40px; text-align: center; color: #fff; box-shadow: 0 30px 70px -28px rgba(255,116,31,.6);
+  }
+  .fcta-box h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(30px, 4.4vw, 50px); line-height: 1.08; position: relative; z-index: 2; }
+  .fcta-box p { font-family: var(--serif); font-size: clamp(17px, 1.8vw, 22px); opacity: .96; margin: 18px auto 32px; max-width: 24em; position: relative; z-index: 2; }
+  .fcta-box .band-inner { position: relative; z-index: 2; }
+  .fcta-box .badge { background: #15120f; }
+  .fcta-deco { position: absolute; z-index: 1; width: min(260px, 30vw); bottom: -50px; left: -50px; opacity: .9; transform: rotate(-8deg); }
+
+  /* ============ FOOTER ============ */
+  footer { padding: 60px 0 44px; border-top: 1px solid #ece1d4; }
+  .foot { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+  .foot .about { max-width: 22em; }
+  .foot .about .tb-brand { margin-bottom: 14px; }
+  .foot .about p { font-family: var(--serif); color: #6b6358; font-size: 14.5px; }
+  .foot-cols { display: flex; gap: 64px; flex-wrap: wrap; }
+  .fc h4 { font-family: var(--display); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #a59b8e; margin-bottom: 16px; }
+  .fc a { font-family: var(--display); display: block; color: #6b6358; font-size: 15px; margin-bottom: 11px; transition: color .15s; }
+  .fc a:hover { color: var(--orange); }
+  .foot-bottom { margin-top: 46px; padding-top: 24px; border-top: 1px solid #ece1d4; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-family: var(--display); color: #a59b8e; font-size: 14px; }
+
+  @media (max-width: 860px) {
+    .steps { grid-template-columns: 1fr; gap: 44px; }
+    .tcards { grid-template-columns: 1fr; }
+    .how-deco { display: none; }
+  }
+
+  /* ============ ENTRANCE ANIMATIONS ============ */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: none; } }
+  @keyframes popIn { from { opacity: 0; transform: scale(.88); } to { opacity: 1; transform: none; } }
+
+  .topbar    { animation: fadeDown .6s ease both; }
+  .stars     { animation: fadeUp .7s ease .15s both; }
+  .s1-text h1{ animation: fadeUp .8s cubic-bezier(.2,.7,.3,1) .28s both; }
+  .s1-text p { animation: fadeUp .8s ease .46s both; }
+  .s1-phone img { animation: popIn .9s cubic-bezier(.2,.7,.3,1) .36s both; }
+  .s1-icons  { animation: popIn .8s cubic-bezier(.2,.7,.3,1) .55s both; }
+  .s1-plate  { animation: fadeUp .9s ease .6s both; }
+
+  .reveal { opacity: 0; transform: translateY(36px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .cols .col.reveal:nth-child(2) { transition-delay: .12s; }
+  .cols .col.reveal:nth-child(3) { transition-delay: .24s; }
+  .s3-text.reveal { transition-delay: .12s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .topbar, .stars, .s1-text h1, .s1-text p, .s1-phone img, .s1-icons, .s1-plate { animation: none !important; }
+    .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== TOP NAV ===================== -->
+<nav class="topbar">
+  <div class="wrap tb-inner">
+    <a class="tb-brand" href="#top">
+      <img src="assets/app-icon.png" alt="Ingredio" />
+      <span>Ingredio</span>
+    </a>
+    <div class="tb-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+      <a class="tb-cta" href="#get">Join waitlist</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== SLIDE 1 ===================== -->
+<section class="slide1" id="top">
+  <img class="s1-icons" src="assets/deck-icons.png" alt="Instagram, TikTok, YouTube, Pinterest, Chrome" />
+  <img class="s1-plate" src="assets/deck-plate.png" alt="" />
+  <div class="wrap s1-grid">
+    <div class="s1-text">
+      <div class="stars" aria-hidden="true">
+        <img src="assets/stars.png" alt="5 stars" />
+      </div>
+      <h1>Import any recipe from anywhere.</h1>
+      <p>Ingredio is the most advanced recipe importing app, extracting recipes directly from videos, not just captions — to deliver accurate, structured recipes in seconds.</p>
+    </div>
+    <div class="s1-phone">
+      <img src="assets/deck-phone1.png" alt="Ingredio My Recipes screen" />
+    </div>
+  </div>
+</section>
+
+<!-- ===================== WAITLIST BAND ===================== -->
+<div class="band reveal" id="get">
+  <div class="wrap band-inner">
+    <div class="wl">
+      <div class="wl-head">Ingredio is launching soon — join the waitlist</div>
+      <form class="waitlist" novalidate>
+        <input type="email" name="email" placeholder="Enter your email" autocomplete="email" required />
+        <button type="submit">Join the waitlist</button>
+      </form>
+      <p class="wl-note">Be first to know when we launch. No spam — see our <a href="privacy.html">Privacy Policy</a>.</p>
+      <p class="wl-success" hidden>🎉 You're on the list! We'll email you the moment Ingredio launches.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SLIDE 2 ===================== -->
+<section class="slide2" id="features">
+  <div class="wrap cols">
+    <div class="col reveal">
+      <h2>Instant grocery lists</h2>
+      <p>Turn any recipes in grocery lists</p>
+      <div class="shot"><img src="assets/slide2-grocery.png" alt="Grocery list in Ingredio" /></div>
+    </div>
+    <div class="col reveal">
+      <h2>Easily import recipes</h2>
+      <p>Keep all your recipes in the same place</p>
+      <div class="shot"><img src="assets/slide2-import.png" alt="Add a recipe using Manual, Links, Generate, Scan" /></div>
+    </div>
+    <div class="col reveal">
+      <h2>Plan your meals</h2>
+      <p>organize meals for the week</p>
+      <div class="shot"><img src="assets/slide2-plan.png" alt="Weekly meal plan in Ingredio" /></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SLIDE 3 ===================== -->
+<section class="slide3">
+  <div class="wrap s3-grid">
+    <div class="s3-phones reveal">
+      <img src="assets/deck-phones3.png" alt="A reel transformed into a recipe in Ingredio" />
+    </div>
+    <div class="s3-text reveal">
+      <h2>From <span class="or">Social Media</span><br>to Your <span class="it">Cookbook</span></h2>
+      <p>Ingredio transforms videos and posts into complete, easy-to-follow recipes in seconds.</p>
+      <img class="s3-icons" src="assets/deck-icons3.png" alt="TikTok, Instagram, Pinterest, Facebook" />
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section class="how" id="how">
+  <img class="how-deco" src="assets/food-stirfry.png" alt="" />
+  <div class="wrap">
+    <div class="shead reveal">
+      <span class="eyebrow">How it works</span>
+      <h2>Three taps from a video to your kitchen</h2>
+      <p>No more screenshots, lost links or "jump to recipe". Ingredio does the work for you.</p>
+    </div>
+    <div class="steps">
+      <div class="stepc reveal">
+        <div class="num">1</div>
+        <h3>Find a recipe</h3>
+        <p>Spot something delicious on Instagram, TikTok, YouTube or any website.</p>
+      </div>
+      <div class="stepc reveal">
+        <div class="num">2</div>
+        <h3>Share to Ingredio</h3>
+        <p>Hit share and Ingredio instantly extracts the ingredients and steps.</p>
+      </div>
+      <div class="stepc reveal">
+        <div class="num">3</div>
+        <h3>Cook, plan &amp; shop</h3>
+        <p>Save it, add it to your week, and turn it into a grocery list.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIALS ===================== -->
+<section class="tst" id="reviews">
+  <div class="wrap">
+    <div class="shead reveal">
+      <span class="eyebrow">Loved by home cooks</span>
+      <h2>People are ditching the screenshots folder</h2>
+    </div>
+    <div class="tcards">
+      <div class="tcard reveal">
+        <div class="rate">★★★★★</div>
+        <blockquote>"I used to lose every recipe in my saved reels. Now I share it, it's clean, and it's already on my meal plan."</blockquote>
+        <div class="who"><div class="av">M</div><div><b>Maya R.</b><span>Home cook</span></div></div>
+      </div>
+      <div class="tcard reveal">
+        <div class="rate">★★★★★</div>
+        <blockquote>"The grocery list alone is worth it. It pulls everything together and sorts it by aisle. Weeknights got so much easier."</blockquote>
+        <div class="who"><div class="av">J</div><div><b>Jordan P.</b><span>Busy parent</span></div></div>
+      </div>
+      <div class="tcard reveal">
+        <div class="rate">★★★★★</div>
+        <blockquote>"It actually reads the video, not just the caption. The recipes come out accurate every time. Genuinely impressed."</blockquote>
+        <div class="who"><div class="av">A</div><div><b>Alex T.</b><span>Food lover</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="shead reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2>Questions, answered</h2>
+    </div>
+    <div class="faq-list reveal">
+      <details open>
+        <summary>Where can I import recipes from?<span class="pm"></span></summary>
+        <div class="ans">Instagram, TikTok, YouTube, Pinterest, Facebook, Reddit and just about any recipe website. You can also scan a cookbook page or photo, paste a link, or generate a recipe with AI.</div>
+      </details>
+      <details>
+        <summary>How does it pull recipes from videos?<span class="pm"></span></summary>
+        <div class="ans">Ingredio reads the actual video — not just the caption — to extract the real ingredients and steps, then formats them into a clean, structured recipe in seconds.</div>
+      </details>
+      <details>
+        <summary>Does it build a grocery list automatically?<span class="pm"></span></summary>
+        <div class="ans">Absolutely. Add recipes to your list and Ingredio combines the ingredients and sorts them by category, so shopping is quick and nothing gets missed.</div>
+      </details>
+      <details>
+        <summary>What devices does it work on?<span class="pm"></span></summary>
+        <div class="ans">Ingredio is built for iPhone. Your recipes sync across your devices when you're signed in.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FINAL CTA ===================== -->
+<section class="fcta">
+  <div class="wrap">
+    <div class="fcta-box reveal">
+      <img class="fcta-deco" src="assets/food-pancakes.png" alt="" />
+      <h2>Be first to cook with Ingredio</h2>
+      <p>Join the waitlist and we'll let you know the moment it's ready.</p>
+      <div class="wl">
+        <form class="waitlist" novalidate>
+          <input type="email" name="email" placeholder="Enter your email" autocomplete="email" required />
+          <button type="submit">Join the waitlist</button>
+        </form>
+        <p class="wl-note">No spam, ever. Unsubscribe anytime.</p>
+        <p class="wl-success" hidden>🎉 You're on the list! Talk soon.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="about">
+        <a class="tb-brand" href="#top">
+          <img src="assets/app-icon.png" alt="Ingredio" />
+          <span>Ingredio</span>
+        </a>
+        <p>Import any recipe from anywhere, plan your week, and cook more of what you love.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="fc">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href="#reviews">Reviews</a>
+          <a href="#get">Join waitlist</a>
+        </div>
+        <div class="fc">
+          <h4>Company</h4>
+          <a href="#">About</a>
+          <a href="#">Contact</a>
+          <a href="#">Blog</a>
+        </div>
+        <div class="fc">
+          <h4>Legal</h4>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Ingredio. All rights reserved.</span>
+      <span>Made for people who love to cook.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ---- scroll reveal ---- */
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.15 });
+    els.forEach(function (el) { io.observe(el); });
+  })();
+
+  /* ---- waitlist ----
+     To collect emails for real, set WAITLIST_ENDPOINT to a POST URL that accepts
+     JSON {email}. Easiest options:
+       • Formspree:  "https://formspree.io/f/yourid"
+       • Supabase:   "https://yeksafbadesmlsxyaxjk.supabase.co/rest/v1/waitlist"
+                     (create a `waitlist(email text)` table with an anon INSERT
+                      policy, and add an "apikey" header below with your anon key)
+     If left empty, submissions are stored in the browser (localStorage) so the
+     form still works while you wire up a real backend. */
+  (function () {
+    var WAITLIST_ENDPOINT = "";
+    var EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+    document.querySelectorAll('.waitlist').forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var input = form.querySelector('input[type=email]');
+        var email = (input.value || '').trim();
+        if (!EMAIL_RE.test(email)) { form.classList.add('err'); input.focus(); return; }
+        form.classList.remove('err');
+
+        var btn = form.querySelector('button');
+        btn.disabled = true; btn.textContent = 'Joining…';
+
+        var done = function () {
+          var wl = form.closest('.wl');
+          form.hidden = true;
+          var note = wl.querySelector('.wl-note'); if (note) note.hidden = true;
+          var ok = wl.querySelector('.wl-success'); if (ok) ok.hidden = false;
+        };
+        var fail = function () {
+          btn.disabled = false; btn.textContent = 'Join the waitlist';
+          alert('Something went wrong. Please try again.');
+        };
+
+        if (WAITLIST_ENDPOINT) {
+          fetch(WAITLIST_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ email: email })
+          }).then(function (r) { r.ok ? done() : fail(); }).catch(fail);
+        } else {
+          try {
+            var key = 'ingredio_waitlist';
+            var list = JSON.parse(localStorage.getItem(key) || '[]');
+            list.push({ email: email, at: new Date().toISOString() });
+            localStorage.setItem(key, JSON.stringify(list));
+          } catch (err) {}
+          setTimeout(done, 450);
+        }
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
